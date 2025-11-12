@@ -1,5 +1,3 @@
-// 2-read_file.js
-
 const fs = require('fs');
 
 function countStudents(path) {
@@ -18,14 +16,13 @@ function countStudents(path) {
       const field = parts[3];
 
       if (field) {
-        if (!fields[field]) {
-          fields[field] = [];
-        }
+        if (!fields[field]) fields[field] = [];
         fields[field].push(firstName);
       }
     });
 
-    for (const [field, names] of Object.entries(fields)) {
+    for (const field of Object.keys(fields).sort()) {
+      const names = fields[field];
       process.stdout.write(`Number of students in ${field}: ${names.length}. List: ${names.join(', ')}\n`);
     }
   } catch (err) {
