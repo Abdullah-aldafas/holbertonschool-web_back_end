@@ -1,26 +1,48 @@
-const Fs = require('fs');
+const fs = require('fs');
 
 function countStudents(path) {
   return new Promise((resolve, reject) => {
-    Fs.readFile(path, (err, databaseFile) => {
+    fs.readFile(path, 'utf8', (err, data) => {
       if (err) {
-        reject(new Error('Cannot load the database'));
+        reject(Error('Cannot load the database'));
         return;
       }
+      const response = [];
+      let msg;
 
-      const databasefile = databaseFile.toString().split('\n');
-      databasefile.shift();
-      const numOfStudents = databasefile.length;
-      const result = [`Number of students: ${numOfStudents}`, [], []];
-      databasefile.forEach((element) => {
-        const resultElement = element.split(',');
-        if (resultElement[3] === 'CS') {
-          result[1].push(resultElement[0]);
-        } else if (resultElement[3] === 'SWE') { result[2].push(resultElement[0]); }
-      });
-      const finalResult = `${result[0]}\nNumber of students in CS: ${result[1].length}. List: ${result[1].toString().split(',').join(', ')}\nNumber of students in SWE: ${result[2].length}. List: ${result[2].toString().split(',').join(', ')}`;
-      console.log(finalResult);
-      resolve(finalResult);
+      const content = data.toString().split('\n');
+
+      let students = content.filter((item) => item);
+
+      students = students.map((item) => item.split(','));
+
+      const NUMBER_OF_STUDENTS = students.length ? students.length - 1 : 0;
+      msg = `Number of students: ${NUMBER_OF_STUDENTS}`;
+      console.log(msg);
+
+      response.push(msg);
+
+      const fields = {};
+      for (const i in students) {
+        if (i !== 0) {
+          if (!fields[students[i][3]]) fields[students[i][3]] = [];
+
+          fields[students[i][3]].push(students[i][0]);
+        }
+      }
+
+      delete fields.field;
+
+      for (const key of Object.keys(fields)) {
+        msg = `Number of students in ${key}: ${
+          fields[key].length
+        }. List: ${fields[key].join(', ')}`;
+
+        console.log(msg);
+
+        response.push(msg);
+      }
+      resolve(response);
     });
   });
 }
