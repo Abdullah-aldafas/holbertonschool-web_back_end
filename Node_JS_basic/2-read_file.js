@@ -1,32 +1,24 @@
-const fs = require('fs');
+const Fs = require('fs');
 
 function countStudents(path) {
   try {
-    const data = fs.readFileSync(path, 'utf8');
-    const lines = data.split('\n').filter((line) => line.trim() !== '');
-    const students = lines.slice(1);
-
-    process.stdout.write(`Number of students: ${students.length}\n`);
-
-    const fields = {};
-
-    students.forEach((line) => {
-      const parts = line.split(',');
-      const firstName = parts[0];
-      const field = parts[3];
-
-      if (field) {
-        if (!fields[field]) fields[field] = [];
-        fields[field].push(firstName);
-      }
+    let databaseFile = Fs.readFileSync(path, 'utf8').toString();
+    databaseFile = databaseFile.split('\n');
+    databaseFile.shift();
+    const numOfStudents = databaseFile.length;
+    const result = [`Number of students: ${numOfStudents}`, [], []];
+    databaseFile.forEach((element) => {
+      const resultElement = element.split(',');
+      if (resultElement[3] === 'CS') {
+        result[1].push(resultElement[0]);
+      } else if (resultElement[3] === 'SWE') { result[2].push(resultElement[0]); }
     });
-
-    for (const field of Object.keys(fields).sort()) {
-      const names = fields[field];
-      process.stdout.write(`Number of students in ${field}: ${names.length}. List: ${names.join(', ')}\n`);
-    }
+    const finalResult = `${result[0]}\nNumber of students in CS: ${result[1].length}. List: ${result[1].toString().split(',').join(', ')}\nNumber of students in SWE: ${result[2].length}. List: ${result[2].toString().split(',').join(', ')}`;
+    console.log(finalResult);
   } catch (err) {
-    throw new Error('Cannot load the database');
+    if (err.code === 'ENOENT') {
+      throw new Error('Cannot load the database');
+    }
   }
 }
 
